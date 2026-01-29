@@ -5,4 +5,4 @@ pluginManagement {
     }
 }
 
-rootProject.name = "DiffLinesCounter"
+rootProject.name = "LinesDiffTracker"

@@ -1,11 +1,11 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
     <!-- Unique identifier of the plugin. It should be FQN. It cannot be changed between the plugin versions. -->
-    <id>com.fappslab.DiffLinesCounter</id>
+    <id>com.fappslab.LinesDiffTracker</id>
 
     <!-- Public plugin name should be written in Title Case.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-name -->
-    <name>DiffLinesCounter</name>
+    <name>LinesDiffTracker</name>
 
     <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
     <vendor email="costa.fbo@gmail.com" url="https://github.com/F4bioo">F4bioo</vendor>
@@ -24,26 +24,26 @@
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
     <extensions defaultExtensionNs="com.intellij">
         <statusBarWidgetFactory
-                id="com.fappslab.difflinescounter.presentation.StatusBarFactory"
-                implementation="com.fappslab.difflinescounter.presentation.StatusBarFactory"/>
+                id="com.fappslab.linesdifftracker.presentation.StatusBarFactory"
+                implementation="com.fappslab.linesdifftracker.presentation.StatusBarFactory"/>
 
         <applicationService
-                serviceImplementation="com.fappslab.difflinescounter.data.storage.PluginSettings"/>
+                serviceImplementation="com.fappslab.linesdifftracker.data.storage.PluginSettings"/>
 
         <projectService
-                serviceImplementation="com.fappslab.difflinescounter.data.storage.BranchMappingsState"/>
+                serviceImplementation="com.fappslab.linesdifftracker.data.storage.BranchMappingsState"/>
 
         <applicationConfigurable
                 parentId="tools"
-                instance="com.fappslab.difflinescounter.presentation.settings.PluginSettingsConfigurable"
-                id="com.fappslab.difflinescounter.settings"
-                displayName="Diff Lines Counter"/>
+                instance="com.fappslab.linesdifftracker.presentation.settings.PluginSettingsConfigurable"
+                id="com.fappslab.linesdifftracker.settings"
+                displayName="Lines Diff Tracker"/>
     </extensions>
 
     <actions>
-        <action id="com.fappslab.difflinescounter.presentation.action.RefreshAction"
-                class="com.fappslab.difflinescounter.presentation.action.RefreshAction"
-                text="DiffLinesCounter Refresh"
+        <action id="com.fappslab.linesdifftracker.presentation.action.RefreshAction"
+                class="com.fappslab.linesdifftracker.presentation.action.RefreshAction"
+                text="LinesDiffTracker Refresh"
                 description="Refresh git repository status"
                 icon="AllIcons.Actions.Refresh">
             <keyboard-shortcut

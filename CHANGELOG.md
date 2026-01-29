@@ -1,5 +1,24 @@
 # Changelog
 
+## [2.3.0] - Jan 29, 2026
+### Added
+- **Branch comparison**: Compare current branch against a configurable target branch instead of just HEAD
+- **Settings panel**: Configure default target branch in Settings → Tools → Diff Lines Counter
+- **Per-branch overrides**: Set different target branches for different source branches (persistent)
+- **Branch selector popup**: Click the widget text to select target branch with searchable dropdown
+- **Refresh button**: Dedicated refresh icon next to the diff count
+- **File save listener**: Auto-refresh on file save
+- **Branch change listener**: Auto-refresh when switching branches
+
+### Changed
+- Display format changed to `→branch: +N:-N` showing target branch and changes
+- Now compares against remote branch by default, falls back to local with warning
+- Includes uncommitted (staged + unstaged) changes in the diff count
+
+### Removed
+- Removed periodic 30-second refresh (now event-driven)
+- Removed files changed count from display
+
 ## [2.2.7] - Jun 13, 2024
 ### Added
 - Structured Gradle properties using buildSrc.
