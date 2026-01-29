@@ -26,6 +26,12 @@
         <statusBarWidgetFactory
                 id="com.fappslab.difflinescounter.presentation.StatusBarFactory"
                 implementation="com.fappslab.difflinescounter.presentation.StatusBarFactory"/>
+
+        <applicationService
+                serviceImplementation="com.fappslab.difflinescounter.data.storage.PluginSettings"/>
+
+        <projectService
+                serviceImplementation="com.fappslab.difflinescounter.data.storage.BranchMappingsState"/>
     </extensions>
 
     <actions>
