@@ -9,5 +9,5 @@ class DiffLinesCounterRepositoryImpl(
 ) : DiffLinesCounterRepository {
 
     override suspend fun query(basePath: String?, targetBranch: String?): DiffStat? =
-        dataSource.query(basePath)
+        dataSource.query(basePath, targetBranch)
 }

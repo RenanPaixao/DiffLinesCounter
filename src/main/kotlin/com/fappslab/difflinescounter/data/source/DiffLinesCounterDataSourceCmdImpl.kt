@@ -13,11 +13,16 @@ class DiffLinesCounterDataSourceCmdImpl(
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : DiffLinesCounterDataSource {
 
-    override suspend fun query(basePath: String?): DiffStat? {
+    override suspend fun query(basePath: String?, targetBranch: String?): DiffStat? {
         return withContext(dispatcher) {
             runCatching {
                 val directory = basePath?.let(::File)
-                val diffProcess = executor.run(directory, "git", "diff", "HEAD", "--stat")
+                val diffArgs = if (targetBranch != null) {
+                    arrayOf("git", "diff", "$targetBranch...HEAD", "--stat")
+                } else {
+                    arrayOf("git", "diff", "HEAD", "--stat")
+                }
+                val diffProcess = executor.run(directory, *diffArgs)
 
                 val changes = diffProcess.inputStream.bufferedReader().useLines { it.lastOrNull() }
                 changes.toDiffStat()
