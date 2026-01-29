@@ -8,6 +8,6 @@ class DiffLinesCounterRepositoryImpl(
     private val dataSource: DiffLinesCounterDataSource
 ) : DiffLinesCounterRepository {
 
-    override suspend fun query(basePath: String?): DiffStat? =
+    override suspend fun query(basePath: String?, targetBranch: String?): DiffStat? =
         dataSource.query(basePath)
 }
