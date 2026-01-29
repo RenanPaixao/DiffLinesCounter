@@ -21,14 +21,14 @@ class GetDiffStatUseCaseTest {
         runTest {
             // Given
             val expectedResult = diffStatStub()
-            coEvery { repository.query(any()) } returns expectedResult
+            coEvery { repository.query(any(), any()) } returns expectedResult
 
             // When
             val result = subject(basePath = "/mock/basePath")
 
             // Then
             assertEquals(expectedResult, result)
-            coVerify { repository.query(any()) }
+            coVerify { repository.query(any(), any()) }
         }
     }
 }
