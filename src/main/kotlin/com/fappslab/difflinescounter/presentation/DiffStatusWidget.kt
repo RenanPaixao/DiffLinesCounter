@@ -1,17 +1,14 @@
 package com.fappslab.difflinescounter.presentation
 
-import com.fappslab.difflinescounter.data.git.GitRepository
-import com.fappslab.difflinescounter.domain.model.ActionPlacesType
-import com.fappslab.difflinescounter.domain.usecase.GetDiffStatUseCase
-import com.fappslab.difflinescounter.domain.usecase.ScheduleUpdatesUseCase
-import com.fappslab.difflinescounter.extension.isNull
-import com.fappslab.difflinescounter.extension.refreshChangesActions
-import com.fappslab.difflinescounter.presentation.action.FileAction
+import com.fappslab.difflinescounter.data.source.GitBranchDataSource
+import com.fappslab.difflinescounter.domain.model.BranchDiffResult
+import com.fappslab.difflinescounter.domain.repository.BranchConfigRepository
+import com.fappslab.difflinescounter.domain.usecase.GetBranchDiffUseCase
+import com.fappslab.difflinescounter.presentation.action.GitBranchChangeListener
 import com.fappslab.difflinescounter.presentation.action.MouseAction
-import com.intellij.ide.DataManager
-import com.intellij.openapi.application.ApplicationManager
+import com.fappslab.difflinescounter.presentation.popup.TargetBranchPopup
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.vfs.VirtualFileManager
+import com.intellij.openapi.vcs.BranchChangeListener
 import com.intellij.openapi.wm.CustomStatusBarWidget
 import com.intellij.openapi.wm.StatusBar
 import kotlinx.coroutines.CoroutineScope
@@ -20,33 +17,30 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import javax.swing.JComponent
 
-private const val REFRESH_DELAY = 30L
-
 class DiffStatusWidget(
     private val project: Project,
     private val component: DiffStatusLabel,
-    private val getDiffStatUseCase: GetDiffStatUseCase,
-    private val scheduleUpdatesUseCase: ScheduleUpdatesUseCase
+    private val getBranchDiffUseCase: GetBranchDiffUseCase,
+    private val gitBranchDataSource: GitBranchDataSource,
+    private val branchConfigRepository: BranchConfigRepository
 ) : CustomStatusBarWidget {
 
     private val job = Job()
     private val coroutineScope = CoroutineScope(Dispatchers.Default + job)
     private val connection = project.messageBus.connect(this)
-    private val mouseAction = MouseAction(::refreshChangesAction)
+    private val mouseAction = MouseAction(::onWidgetClicked)
+
+    private var lastResult: BranchDiffResult? = null
 
     init {
-        setupFilesChangeTracker()
-        setupScheduleUpdates()
+        setupBranchChangeListener()
         setupMouseListener()
+        refreshDiff()
     }
 
-    override fun getComponent(): JComponent {
-        return component
-    }
+    override fun getComponent(): JComponent = component
 
-    override fun ID(): String {
-        return ID
-    }
+    override fun ID(): String = ID
 
     override fun dispose() {
         component.removeMouseListener(mouseAction)
@@ -56,36 +50,60 @@ class DiffStatusWidget(
 
     override fun install(statusBar: StatusBar) {}
 
+    fun refreshDiff() {
+        coroutineScope.launch {
+            val result = getBranchDiffUseCase(project.basePath)
+            lastResult = result
+            component.showChanges(result)
+        }
+    }
+
     private fun setupMouseListener() {
         component.addMouseListener(mouseAction)
     }
 
-    private fun setupScheduleUpdates() {
-        coroutineScope.launch {
-            scheduleUpdatesUseCase(REFRESH_DELAY, ::refreshChangesAction)
-        }
-    }
-
-    private fun setupFilesChangeTracker() {
+    private fun setupBranchChangeListener() {
         connection.subscribe(
-            VirtualFileManager.VFS_CHANGES,
-            FileAction {
-                coroutineScope.launch {
-                    val diffStat = getDiffStatUseCase(project.basePath)
-                    component.showChanges(diffStat)
-                }
-            }
+            BranchChangeListener.VCS_BRANCH_CHANGED,
+            GitBranchChangeListener(::refreshDiff)
         )
     }
 
-    private fun refreshChangesAction() {
-        if (GitRepository.provider(project.basePath).isNull()) {
-            component.showChanges(diffStat = null)
-        } else {
-            ApplicationManager.getApplication().invokeLater {
-                val dataContext = DataManager.getInstance().getDataContext(component)
-                dataContext.refreshChangesActions(ActionPlacesType.StatusBarPlace)
+    private fun onWidgetClicked() {
+        coroutineScope.launch {
+            val currentBranch = gitBranchDataSource.getCurrentBranch(project.basePath)
+            val branches = gitBranchDataSource.listAllBranches(project.basePath)
+            val currentTarget = currentBranch?.let {
+                branchConfigRepository.getTargetBranchForSource(it)
+            } ?: branchConfigRepository.getDefaultBranch()
+
+            launch(Dispatchers.Main) {
+                showBranchPopup(currentBranch, currentTarget, branches)
             }
+        }
+    }
+
+    private fun showBranchPopup(currentBranch: String?, currentTarget: String?, branches: List<String>) {
+        val popup = TargetBranchPopup(
+            currentTarget = currentTarget,
+            branches = branches
+        ) { selectedBranch ->
+            onBranchSelected(currentBranch, selectedBranch)
+        }
+
+        popup.createPopup().showInCenterOf(component)
+    }
+
+    private fun onBranchSelected(currentBranch: String?, selectedBranch: String) {
+        currentBranch?.let { source ->
+            // Extract branch name if it's a remote branch (origin/branch -> branch)
+            val targetName = if (selectedBranch.contains("/")) {
+                selectedBranch.substringAfterLast("/")
+            } else {
+                selectedBranch
+            }
+            branchConfigRepository.setTargetBranchForSource(source, targetName)
+            refreshDiff()
         }
     }
 }
