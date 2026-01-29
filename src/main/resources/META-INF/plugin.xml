@@ -32,6 +32,12 @@
 
         <projectService
                 serviceImplementation="com.fappslab.difflinescounter.data.storage.BranchMappingsState"/>
+
+        <applicationConfigurable
+                parentId="tools"
+                instance="com.fappslab.difflinescounter.presentation.settings.PluginSettingsConfigurable"
+                id="com.fappslab.difflinescounter.settings"
+                displayName="Diff Lines Counter"/>
     </extensions>
 
     <actions>
