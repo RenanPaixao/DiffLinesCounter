@@ -1,5 +1,5 @@
 # LinesDiffTracker
-
+<!-- start description -->
 LinesDiffTracker helps you assess the volume of code modifications before submitting a Pull Request (PR), ensuring that PRs remain streamlined and manageable. It's a plugin for JetBrains IDEs that shows the difference between your current working state and a configurable target branch. With just a glance, you can see how many lines have been added or removed compared to your target branch (e.g., `develop` or `main`).
 
 ## Features
