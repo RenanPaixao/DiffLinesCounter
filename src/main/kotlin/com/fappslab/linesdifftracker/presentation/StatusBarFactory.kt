@@ -6,6 +6,8 @@ import com.fappslab.linesdifftracker.data.service.ProcessExecutorImpl
 import com.fappslab.linesdifftracker.data.source.LinesDiffTrackerDataSourceCmdImpl
 import com.fappslab.linesdifftracker.data.source.GitBranchDataSource
 import com.fappslab.linesdifftracker.data.source.GitBranchDataSourceImpl
+import com.fappslab.linesdifftracker.data.source.GitTownDataSource
+import com.fappslab.linesdifftracker.data.source.GitTownDataSourceImpl
 import com.fappslab.linesdifftracker.data.storage.BranchMappingsState
 import com.fappslab.linesdifftracker.data.storage.PluginSettings
 import com.fappslab.linesdifftracker.domain.repository.BranchConfigRepository
@@ -32,12 +34,14 @@ class StatusBarFactory : StatusBarWidgetFactory {
         val executor = ProcessExecutorImpl()
         val diffRepository = provideDiffRepository(executor)
         val gitBranchDataSource = provideGitBranchDataSource(executor)
+        val gitTownDataSource = provideGitTownDataSource(executor)
         val branchConfigRepository = provideBranchConfigRepository(project)
 
         val getBranchDiffUseCase = GetBranchDiffUseCase(
             diffRepository = diffRepository,
             configRepository = branchConfigRepository,
-            gitBranchDataSource = gitBranchDataSource
+            gitBranchDataSource = gitBranchDataSource,
+            gitTownDataSource = gitTownDataSource
         )
 
         return DiffStatusWidget(
@@ -64,6 +68,10 @@ class StatusBarFactory : StatusBarWidgetFactory {
 
     private fun provideGitBranchDataSource(executor: ProcessExecutorImpl): GitBranchDataSource {
         return GitBranchDataSourceImpl(executor = executor)
+    }
+
+    private fun provideGitTownDataSource(executor: ProcessExecutorImpl): GitTownDataSource {
+        return GitTownDataSourceImpl(executor = executor)
     }
 
     private fun provideBranchConfigRepository(project: Project): BranchConfigRepository {

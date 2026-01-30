@@ -9,4 +9,6 @@ interface BranchConfigRepository {
     fun setTargetBranchForSource(sourceBranch: String, targetBranch: String)
     fun getAllMappings(): List<BranchMapping>
     fun removeMapping(sourceBranch: String)
+    fun isGitTownEnabled(): Boolean
+    fun setGitTownEnabled(enabled: Boolean)
 }

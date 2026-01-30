@@ -1,6 +1,7 @@
 package com.fappslab.linesdifftracker.domain.usecase
 
 import com.fappslab.linesdifftracker.data.source.GitBranchDataSource
+import com.fappslab.linesdifftracker.data.source.GitTownDataSource
 import com.fappslab.linesdifftracker.domain.model.BranchDiffResult
 import com.fappslab.linesdifftracker.domain.model.DiffStat
 import com.fappslab.linesdifftracker.domain.repository.BranchConfigRepository
@@ -9,7 +10,8 @@ import com.fappslab.linesdifftracker.domain.repository.LinesDiffTrackerRepositor
 class GetBranchDiffUseCase(
     private val diffRepository: LinesDiffTrackerRepository,
     private val configRepository: BranchConfigRepository,
-    private val gitBranchDataSource: GitBranchDataSource
+    private val gitBranchDataSource: GitBranchDataSource,
+    private val gitTownDataSource: GitTownDataSource
 ) {
 
     suspend operator fun invoke(basePath: String?): BranchDiffResult? {
@@ -41,12 +43,19 @@ class GetBranchDiffUseCase(
         // 1. Check per-branch mapping
         configRepository.getTargetBranchForSource(currentBranch)?.let { return it }
 
-        // 2. Check default branch setting
+        // 2. Check Git Town parent (if enabled)
+        if (configRepository.isGitTownEnabled()) {
+            gitTownDataSource.getParentBranch(basePath)?.let { parentBranch ->
+                if (branchExists(basePath, parentBranch)) return parentBranch
+            }
+        }
+
+        // 3. Check default branch setting
         configRepository.getDefaultBranch()?.let { defaultBranch ->
             if (branchExists(basePath, defaultBranch)) return defaultBranch
         }
 
-        // 3. Fallback chain: main -> master
+        // 4. Fallback chain: main -> master
         return FALLBACK_BRANCHES.firstOrNull { branchExists(basePath, it) }
     }
 

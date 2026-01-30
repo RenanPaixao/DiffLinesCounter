@@ -32,4 +32,11 @@ class BranchConfigRepositoryImpl(
     override fun removeMapping(sourceBranch: String) {
         branchMappingsState.removeMapping(sourceBranch)
     }
+
+    override fun isGitTownEnabled(): Boolean =
+        pluginSettings.gitTownEnabled
+
+    override fun setGitTownEnabled(enabled: Boolean) {
+        pluginSettings.gitTownEnabled = enabled
+    }
 }

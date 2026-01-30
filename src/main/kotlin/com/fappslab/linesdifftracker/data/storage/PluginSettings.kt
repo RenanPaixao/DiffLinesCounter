@@ -12,7 +12,8 @@ import com.intellij.openapi.components.Storage
 class PluginSettings : PersistentStateComponent<PluginSettings.State> {
 
     data class State(
-        var defaultBranch: String? = null
+        var defaultBranch: String? = null,
+        var gitTownEnabled: Boolean = false
     )
 
     private var state = State()
@@ -27,6 +28,12 @@ class PluginSettings : PersistentStateComponent<PluginSettings.State> {
         get() = state.defaultBranch
         set(value) {
             state.defaultBranch = value
+        }
+
+    var gitTownEnabled: Boolean
+        get() = state.gitTownEnabled
+        set(value) {
+            state.gitTownEnabled = value
         }
 
     companion object {

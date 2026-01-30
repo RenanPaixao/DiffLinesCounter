@@ -20,18 +20,21 @@ class PluginSettingsConfigurable : Configurable {
 
     override fun isModified(): Boolean {
         val settings = PluginSettings.getInstance()
-        return settingsPanel?.defaultBranch != (settings.defaultBranch ?: "")
+        return settingsPanel?.defaultBranch != (settings.defaultBranch ?: "") ||
+            settingsPanel?.gitTownEnabled != settings.gitTownEnabled
     }
 
     override fun apply() {
         val settings = PluginSettings.getInstance()
         val newValue = settingsPanel?.defaultBranch
         settings.defaultBranch = if (newValue.isNullOrBlank()) null else newValue
+        settings.gitTownEnabled = settingsPanel?.gitTownEnabled ?: false
     }
 
     override fun reset() {
         val settings = PluginSettings.getInstance()
         settingsPanel?.defaultBranch = settings.defaultBranch ?: ""
+        settingsPanel?.gitTownEnabled = settings.gitTownEnabled
     }
 
     override fun disposeUIResources() {
