@@ -16,9 +16,6 @@ class GitTownDataSourceImpl(
             runCatching {
                 val directory = basePath?.let(::File)
                 val process = executor.run(directory, "git", "town", "config", "get-parent")
-                val exitCode = process.waitFor()
-                if (exitCode != 0) return@runCatching null
-
                 val parent = process.inputStream.bufferedReader().readLine()?.trim()
                 parent?.takeIf { it.isNotEmpty() }
             }.getOrNull()
